@@ -1,0 +1,16 @@
+{
+    "short_name": "PWA for ODE", 
+    "name": "PWA for Ordinary Differential Equations", 
+    "icons": [
+        {
+            "src": "./images/iconb1024.png", 
+            "type": "image/png", 
+            "sizes": "1024x1024", 
+            "purpose": "any maskable"
+        }
+    ], 
+    "start_url": ".", 
+    "display": "standalone", 
+    "theme_color": "#000000", 
+    "background_color": "#FFFFFF"
+}

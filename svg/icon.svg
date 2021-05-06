@@ -1,0 +1,81 @@
+<svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg" width="1024" height="1024">
+    
+    <rect  
+        x="-15" 
+        y="5" 
+        width="130" 
+        height="130"
+        fill="#18191A"
+        rx="20"
+        ry="20"
+        
+    />
+
+    <ellipse 
+        rx="10.496939" 
+        ry="14.497783" 
+        cx="-55" 
+        cy="104"
+        class="back"
+    
+        fill="#751B19"
+        stroke="black" transform="rotate(-45)"
+    />
+    
+    <path 
+        stroke="black"
+        stroke-width="1"
+        fill="#9B211F"
+        class="body"
+
+        d="M 28.312621 120.675565
+            A 20 44.7213 0 0 0  39.287710 67.972109 
+            A 20 44.7213 0 0 1 68.578440 17.242373
+            A 20 44.7213 0 0 0 59.287710 67.972109
+            A 20 44.7213 0 0 1 42.084597 124.477772
+            A 10.496939 14.497783 -45 0 1 28.312621 120.675565"
+    />
+
+    <path
+        stroke="black"
+        stroke-width="1"
+        fill="#C12825"
+        class="belly"
+    
+        d="M 57.733382 100.679356
+            A 20 44.7213 0 0 0 40.866617 35.320643
+            A 20 44.7213 0 0 0 57.733382 100.679356"
+    />
+
+    <ellipse 
+        rx="10.496939" 
+        ry="14.497783" 
+        cx="27" 
+        cy="61"
+        class="head"
+        fill="#C12825"
+        stroke="black" 
+        transform="rotate(-45)"
+    />
+
+    <ellipse 
+        rx="2" 
+        ry="5" 
+        cx="61" 
+        cy="22" 
+        class="eye"
+    />
+
+    <path 
+        stroke-width="1"
+        stroke="black"
+        class="tongue"
+
+        d="M 70 36
+            A 10 10 0 0 0 74 39
+            A 10 10 0 0 1 70 36
+            A 10 10 0 0 1 69 43
+            A 10 10 0 0 0 70 36"
+    />
+
+</svg>
