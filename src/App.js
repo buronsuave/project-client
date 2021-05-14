@@ -30,7 +30,7 @@ const App = () => {
                     <PrivateRoute exact path="/record" component={Record}/>
                     <PrivateRoute exact path="/settings" component={Settings}/>
                     <PrivateRoute exact path="/about" component={About}/>
-                    <PrivateRoute exact path="/preview/:equation/:string" component={Preview}/>
+                    <PrivateRoute exact path="/preview/:equation" component={Preview}/>
 
                      {/**
                       * Solve Screens

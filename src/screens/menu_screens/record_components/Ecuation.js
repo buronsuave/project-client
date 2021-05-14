@@ -1,12 +1,17 @@
-/*import React from "react";
+import React from "react";
+import { Link } from 'react-router-dom';
 import {XIcon, PinIcon} from '@primer/octicons-react'
 import "./Ecuation.css"
 
-const Ecuation = () => {
+const MathJax = require('react-mathjax')
+
+const Ecuation = ({ ecuation }) => {
     return (
-        <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+        <Link to={`/preview/${ecuation}`} class="list-group-item list-group-item-action flex-column align-items-start">
           <div class="d-flex w-100 justify-content-between">
-            <h5 class="mb-1">y' + 2xy = 0</h5>
+            <MathJax.default.Provider>
+              <MathJax.default.Node inline formula = { ecuation }/>
+            </MathJax.default.Provider>
             <small>  
               <button class="btn bg-transparent">
                 <XIcon size={24} />
@@ -17,6 +22,8 @@ const Ecuation = () => {
             </small>
           </div>
           <p class="mb-1">Sunday 4, April 18:25</p>   
-        </a> 
+        </Link> 
     )
-}*/
+}
+
+export default Ecuation;

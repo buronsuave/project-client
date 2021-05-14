@@ -8,12 +8,11 @@ const request = require("request-promise");
 const MathJax = require('react-mathjax')
 
 const Preview = () => {
-    const { equation, string } = useParams();
+    const { equation } = useParams();
     const [ solution, setSolution ] = useState([]);
+    const send = equation.replace("%2F", "/");
 
     const handleSubmit = async () => {
-        const send = string.replace("%2F", "/");
-
         const options = {
             method: "POST",
             uri: `http://127.0.0.1:4000/solve`, 
@@ -57,7 +56,7 @@ const Preview = () => {
                 <br></br>
                 <h3>
                     <MathJax.default.Provider>
-                        <MathJax.default.Node inline formula = {equation}/>
+                        <MathJax.default.Node inline formula = { send }/>
                     </MathJax.default.Provider>
                 </h3><br></br>
                 <button onClick={ handleSubmit } type="button" className="btn btn-primary">Solve</button><br></br>

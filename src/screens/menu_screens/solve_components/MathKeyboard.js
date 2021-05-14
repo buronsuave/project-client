@@ -66,7 +66,7 @@ const MathKeyboard = ({ history }) => {
         if (res.status !== 'ok') {
             alert(res.status);
         } else {
-            history.push(`/preview/${res.equation}/${equation.replace("/", "%2F")}`);
+            history.push(`/preview/${res.equation}`);
         }
     }
 
