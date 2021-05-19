@@ -13,6 +13,8 @@ const Preview = () => {
     const { currentUser } = useContext(AuthContext);
     const { equation } = useParams();
     const [solution, setSolution] = useState([]);
+    const [ showLatex, setShowLatex ] = useState(false);
+
     const send = equation.replace("%2F", "/");
 
     const addEquation = async (equation) => {
@@ -40,9 +42,51 @@ const Preview = () => {
         if (res.status !== 'ok') {
             alert(res.status);
         } else {
-            setSolution([
-                { latex: res.solution, header: "Final Solution" }
-            ]);
+            var solutionAux = [] 
+            const aux = res.solution.replaceAll("'", "\"")
+            const jsonSolve = JSON.parse(aux)
+            for (let index = 0; index < jsonSolve.length; index++) {
+                const step = jsonSolve[index];
+                const stepHeader = step[0]
+                var stepLatex = ""
+                for (let j = 0; j < step[1].length; j++) {
+                    stepLatex += step[1][j];
+                }
+                const stepObject = {latex: stepLatex, header: stepHeader}
+                solutionAux.push(stepObject)
+            }
+            setSolution(solutionAux);
+        }
+    }
+
+    const removeSpecialLatex = (input) => {
+        return input.replaceAll("$", "")
+    }
+
+    const getText = (input) => {
+        return input.replace("\\mathtt{\\text{-", "").replace("}}\\\\ \\\\", "")
+    } 
+
+    const getLaTeX = () => {
+        var latex = "";
+        for (let i = 0; i < solution.length; i++) {
+            latex += solution[i].header; 
+            latex += solution[i].latex;
+        }
+        return latex;
+    }
+
+    const printLaTeX = () => {
+        setShowLatex(!showLatex)
+    }
+
+    const renderLaTeXBox = () => {
+        if (showLatex) {
+            return (
+                <div>
+                    <textarea readOnly className="form-control" style={{ height: "300px" }}>{ getLaTeX() }</textarea>
+                </div>
+            )
         }
     }
 
@@ -52,15 +96,37 @@ const Preview = () => {
             return solution.map(step => (
                 <div>
                     <br></br>
-                    <h4>
-                        Step {i}: {step.header}
+                    <h4> 
+                        Step {i}:
+                        {getText(step.header)}
                         {(() => { i++ })()}
                     </h4><br></br>
                     <MathJax.default.Provider>
-                        <MathJax.default.Node inline formula={step.latex} />
+                        <MathJax.default.Node inline formula={ removeSpecialLatex(step.latex) } />
                     </MathJax.default.Provider>
                 </div>
             ))
+        }
+    }
+
+    const renderLaTeXButton = () => {
+        if (solution.length > 0) {
+            if (!showLatex) {
+                return (
+                    <div>
+                        <button onClick={ printLaTeX } type="button" className="btn btn-success">Get LaTeX</button>
+                        <br></br>
+                        <br></br>
+                    </div>
+                )
+            }
+            return (
+                <div>
+                    <button onClick={ printLaTeX } type="button" className="btn btn-danger">Hide LaTeX</button>
+                    <br></br>
+                    <br></br>
+                </div>
+            )
         }
     }
 
@@ -80,6 +146,8 @@ const Preview = () => {
                 <div id="solve">
                     {renderSolve()}
                 </div>
+                { renderLaTeXButton() }
+                { renderLaTeXBox() }
             </div>
         </div>
     )

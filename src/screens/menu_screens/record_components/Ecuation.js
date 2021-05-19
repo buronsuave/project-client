@@ -26,8 +26,17 @@ const Ecuation = ({ item }) => {
     await db.collection('equations').doc(item.id).set({ ...item, pinned })
   }
 
+  const renderColor = () => {
+    if(pinned){
+      return "#5d5d5a"
+    }
+    else{
+      return "#303030"
+    }
+  }
+
   return (
-    <Link to={`/preview/${eq}`} class="list-group-item list-group-item-action flex-column align-items-start">
+    <Link to={`/preview/${eq}`} class="list-group-item list-group-item-action flex-column align-items-start " style={{background: renderColor()}}>
       <div class="d-flex w-100 justify-content-between">
         <MathJax.default.Provider>
           <MathJax.default.Node inline formula={eq} />
@@ -39,7 +48,7 @@ const Ecuation = ({ item }) => {
             </button>
           </Link>
           <Link to={`/record`}>
-            <button class="btn bg-transparent"  Click={onUpdate}>
+            <button class="btn bg-transparent"  onClick={onUpdate}>
               <PinIcon size={24} />
             </button>
           </Link>
