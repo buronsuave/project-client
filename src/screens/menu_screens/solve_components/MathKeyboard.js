@@ -99,7 +99,7 @@ const MathKeyboard = ({ history }) => {
 
             case "x" : writeChar("x")(); break;
             case "y" : writeChar("y")(); break;
-            case "e" : writeChar("e")(); break;
+            case "E" : writeChar("E")(); break;
             case "p" : writeChar("pi")(); break;
 
             case "s" : writeChar("sin")(); break;
@@ -182,7 +182,7 @@ const MathKeyboard = ({ history }) => {
                     <button type="button" className="btn btn-danger btn-lg btn-block" onClick={ writeChar("6") }>6</button>
                 </div>
                 <div className="col-6 col-sm-2">
-                    <button type="button" className="btn btn-success btn-lg btn-block" onClick={ writeChar("e") }>e</button>
+                    <button type="button" className="btn btn-success btn-lg btn-block" onClick={ writeChar("E") }>E</button>
                 </div>
                 <div className="col-6 col-sm-2">
                     <button type="button" className="btn btn-success btn-lg btn-block" onClick={ writeChar("pi")}>pi</button>
