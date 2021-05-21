@@ -115,6 +115,7 @@ const MathKeyboard = ({ history }) => {
             case "ArrowRight" : moveRight(); break;
             case "Delete" : clear(); break;
             case "Enter": handleSubmit(); break;
+
             default: break;
         }
     }

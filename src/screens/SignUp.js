@@ -1,19 +1,40 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useContext } from "react";
 import { withRouter } from "react-router";
 import app from "../base";
+import { AuthContext } from "../auth";
 
 const SignUp = ({ history }) => {
+
+    //const { currentUser } = useContext(AuthContext);
 
     const handleSignUp = useCallback(
         async event => {
             event.preventDefault();
-            const { email, password } = event.target.elements;
-            try {
-                app.auth().createUserWithEmailAndPassword(email.value, password.value);
-                history.push("/");
-            } catch (error) {
-                alert(error);
+            const { email, password, confirmPassword, userType, isSubscribed } = event.target.elements;
+
+            const addUser = async (userType, isSubscribed) => {
+                const db = app.firestore();
+                var isTrueSet = (isSubscribed.value === 'true')
+                
+                await db.collection('users').doc().set({
+                    isSubscribed: isTrueSet,
+                    type: userType.value
+                });
             }
+
+            if(password.value !== confirmPassword.value) {
+                alert("Passwords dont match")
+            }
+            else {
+                try {
+                    app.auth().createUserWithEmailAndPassword(email.value, password.value);
+                    await addUser(userType, isSubscribed)
+                    history.push("/");
+                } catch (error) {
+                    alert(error);
+                }
+            }
+            
         }, [history]
     );
 
@@ -31,15 +52,19 @@ const SignUp = ({ history }) => {
                         <label>Password</label>
                         <input name="password" type="password" className="form-control" id="exampleInputPassword1" placeholder="Password" />
                     </div>
+                    <div className="form-group">
+                        <label>Confirm Password</label>
+                        <input name="confirmPassword" type="password" className="form-control" id="exampleInputPassword1" placeholder="Password" />
+                    </div>
                     <div class="form-group">
                         <label>User type</label>
-                        <select class="custom-select d-block w-100" id="inputGroupSelect" required>
+                        <select name="userType" class="custom-select d-block w-100" id="inputGroupSelect" required>
                             <option value="student">student</option>
                             <option value="teacher">teacher</option>
                         </select>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="" id="defaultCheck1"></input>
+                        <input name="isSubscribed" class="form-check-input" type="checkbox" value="true" id="defaultCheck1"></input>
                         <label>I want to receive updates in my email</label>
                     </div>
                     <br></br>
