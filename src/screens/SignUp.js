@@ -1,34 +1,57 @@
 import React, { useCallback, useContext } from "react";
 import { withRouter } from "react-router";
 import app from "../base";
-import { AuthContext } from "../auth";
 
 const SignUp = ({ history }) => {
-
-    //const { currentUser } = useContext(AuthContext);
 
     const handleSignUp = useCallback(
         async event => {
             event.preventDefault();
             const { email, password, confirmPassword, userType, isSubscribed } = event.target.elements;
 
-            const addUser = async (userType, isSubscribed) => {
+            const addUser = async (userType, isSubscribed, uid) => {
                 const db = app.firestore();
-                var isTrueSet = (isSubscribed.value === 'true')
+                var isTrueSet = isSubscribed.checked;
                 
-                await db.collection('users').doc().set({
+                await db.collection('users').doc(uid).set({
+                    email: email.value,
                     isSubscribed: isTrueSet,
-                    type: userType.value
+                    type: userType.value, 
                 });
             }
 
-            if(password.value !== confirmPassword.value) {
-                alert("Passwords dont match")
+            function validatePassword(newPassword) {
+                var minNumberofChars = 6;
+                var maxNumberofChars = 16;
+                var regularExpression  = /^[a-zA-Z0-9]{6,16}$/;
+
+                if (newPassword.length < minNumberofChars || newPassword.length > maxNumberofChars){
+                    alert("Bad length");
+                    return false;
+                }
+
+                if (!regularExpression.test(newPassword)) {
+                    alert("Bad chars");
+                    return false;
+                }
+
+                return true;
             }
+            
+            if (!validatePassword(password.value)) {
+                alert("Invalid password")
+                return;
+            }
+
+            if (password.value !== confirmPassword.value) {
+                alert("Passwords dont match")
+                return;
+            }
+
             else {
                 try {
-                    app.auth().createUserWithEmailAndPassword(email.value, password.value);
-                    await addUser(userType, isSubscribed)
+                    const newUser = await app.auth().createUserWithEmailAndPassword(email.value, password.value);
+                    await addUser(userType, isSubscribed, newUser.user.uid);
                     history.push("/");
                 } catch (error) {
                     alert(error);
@@ -64,7 +87,7 @@ const SignUp = ({ history }) => {
                         </select>
                     </div>
                     <div class="form-check">
-                        <input name="isSubscribed" class="form-check-input" type="checkbox" value="true" id="defaultCheck1"></input>
+                        <input name="isSubscribed" class="form-check-input" type="checkbox" id="defaultCheck1"></input>
                         <label>I want to receive updates in my email</label>
                     </div>
                     <br></br>

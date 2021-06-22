@@ -13,7 +13,7 @@ const Preview = () => {
     const { currentUser } = useContext(AuthContext);
     const { equation } = useParams();
     const [solution, setSolution] = useState([]);
-    const [ showLatex, setShowLatex ] = useState(false);
+    const [showLatex, setShowLatex] = useState(false);
 
     const send = equation.replace("%2F", "/");
 
@@ -21,11 +21,14 @@ const Preview = () => {
         const db = app.firestore();
         const uid = currentUser.uid;
 
-        await db.collection('equations').doc().set({
+        const newEquation = {
             date: new Date().toString().split("GMT")[0],
             equation: equation,
-            idUser: uid,
             pinned: false
+        }
+
+        await db.collection('users').doc(uid).collection('equations').doc().set({
+            ...newEquation
         });
     }
 
@@ -42,7 +45,7 @@ const Preview = () => {
         if (res.status !== 'ok') {
             alert(res.status);
         } else {
-            var solutionAux = [] 
+            var solutionAux = []
             const aux = res.solution.replaceAll("'", "\"")
             const jsonSolve = JSON.parse(aux)
             for (let index = 0; index < jsonSolve.length; index++) {
@@ -52,7 +55,7 @@ const Preview = () => {
                 for (let j = 0; j < step[1].length; j++) {
                     stepLatex += step[1][j];
                 }
-                const stepObject = {latex: stepLatex, header: stepHeader}
+                const stepObject = { latex: stepLatex, header: stepHeader }
                 solutionAux.push(stepObject)
             }
             setSolution(solutionAux);
@@ -65,12 +68,12 @@ const Preview = () => {
 
     const getText = (input) => {
         return input.replace("\\mathtt{\\text{-", "").replace("}}\\\\ \\\\", "")
-    } 
+    }
 
     const getLaTeX = () => {
         var latex = "";
         for (let i = 0; i < solution.length; i++) {
-            latex += solution[i].header; 
+            latex += solution[i].header;
             latex += solution[i].latex;
         }
         return latex;
@@ -84,7 +87,7 @@ const Preview = () => {
         if (showLatex) {
             return (
                 <div>
-                    <textarea readOnly className="form-control" style={{ height: "300px" }}>{ getLaTeX() }</textarea>
+                    <textarea readOnly className="form-control" style={{ height: "300px" }}>{getLaTeX()}</textarea>
                 </div>
             )
         }
@@ -96,13 +99,13 @@ const Preview = () => {
             return solution.map(step => (
                 <div>
                     <br></br>
-                    <h4> 
+                    <h4>
                         Step {i}:
                         {getText(step.header)}
                         {(() => { i++ })()}
                     </h4><br></br>
                     <MathJax.default.Provider>
-                        <MathJax.default.Node inline formula={ removeSpecialLatex(step.latex) } />
+                        <MathJax.default.Node inline formula={removeSpecialLatex(step.latex)} />
                     </MathJax.default.Provider>
                 </div>
             ))
@@ -114,7 +117,7 @@ const Preview = () => {
             if (!showLatex) {
                 return (
                     <div>
-                        <button onClick={ printLaTeX } type="button" className="btn btn-success">Get LaTeX</button>
+                        <button onClick={printLaTeX} type="button" className="btn btn-success">Get LaTeX</button>
                         <br></br>
                         <br></br>
                     </div>
@@ -122,7 +125,7 @@ const Preview = () => {
             }
             return (
                 <div>
-                    <button onClick={ printLaTeX } type="button" className="btn btn-danger">Hide LaTeX</button>
+                    <button onClick={printLaTeX} type="button" className="btn btn-danger">Hide LaTeX</button>
                     <br></br>
                     <br></br>
                 </div>
@@ -146,8 +149,8 @@ const Preview = () => {
                 <div id="solve">
                     {renderSolve()}
                 </div>
-                { renderLaTeXButton() }
-                { renderLaTeXBox() }
+                {renderLaTeXButton()}
+                {renderLaTeXBox()}
             </div>
         </div>
     )

@@ -13,7 +13,7 @@ const Home = () => {
                 <hr className="my-4"/>
                 <p>Get the steps to solve higher order linear, homogeneous, exact, and separable ordinary differential equations.</p>
                 <p className="lead">
-                    <a className="btn btn-primary btn-lg" href="/solve" role="button">Let's solve it!</a>
+                    <a className="btn btn-primary btn-lg" href="/keyboard" role="button">Let's solve it!</a>
                 </p>
             </div>
         </div>

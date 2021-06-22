@@ -1,29 +1,36 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Link } from 'react-router-dom';
 import { XIcon, PinIcon } from '@primer/octicons-react'
 import app from "../../../base"
 import "./Ecuation.css"
+import { AuthContext } from "../../../auth";
 
 const MathJax = require('react-mathjax')
-
 
 const Ecuation = ({ item }) => {
   const eq = item.equation;
   const date = item.date
+  const { currentUser } = useContext(AuthContext);
 
   const [pinned, setPinned] = useState(item.pinned)
 
   const onDelete = async () => {
     if (window.confirm('Are you sure you want to delete this link?')) {
       const db = app.firestore()
-      await db.collection('equations').doc(item.id).delete()
+      await db.collection('users').doc(currentUser.uid).collection("equations").doc(item.id).delete()
+      window.location.reload(false); 
     }
   }
 
   const onUpdate = async () => {
     const db = app.firestore()
-    setPinned(!pinned)
-    await db.collection('equations').doc(item.id).set({ ...item, pinned })
+    var newPinned = !pinned
+    setPinned(newPinned)
+    await db.collection('users').doc(currentUser.uid).collection("equations").doc(item.id).set({ 
+      date: item.date, 
+      equation: item.equation, 
+      pinned: newPinned
+    })
   }
 
   const renderColor = () => {

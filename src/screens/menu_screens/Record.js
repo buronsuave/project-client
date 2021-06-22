@@ -13,12 +13,10 @@ const Record = () => {
     useEffect(() => {
         const fetchData = async () => {
             const db = app.firestore()
-            db.collection("equations").onSnapshot((querySnapshot) => {
+            db.collection("users").doc(currentUser.uid).collection("equations").onSnapshot((querySnapshot) => {
                 const docs = []
                 querySnapshot.forEach((doc) => {
-                    if (doc.data().idUser === currentUser.uid) {
-                        docs.push({ ...doc.data(), id: doc.id });
-                    }
+                    docs.push({ ...doc.data(), id: doc.id });
                 })
                 setEquations(docs)
             })
@@ -27,9 +25,90 @@ const Record = () => {
     }, [currentUser.uid]);
 
     const renderRecord = () => {
-        return equations.map(item => (
-            <Ecuation item={ item } />
-        ))
+        const db = app.firestore()
+
+        if (equations.length === 0) {
+            return (
+                <>
+                    <p className="lead">You haven't solved any differential equations yet. Try some to generate a history</p>    
+                </>
+            );
+        } else {
+            var equationsPinnedSorted = []
+            var equationsNoPinnedSorted = []
+            var equationsSorted = []
+
+            for (var i = 0; i < equations.length; i++) {
+                if (equations[i].pinned) {
+                    equationsPinnedSorted.push(equations[i]);
+                } else {
+                    equationsNoPinnedSorted.push(equations[i]);
+                }
+            }
+
+            equationsPinnedSorted = sortByDate(equationsPinnedSorted);
+            equationsNoPinnedSorted = sortByDate(equationsNoPinnedSorted);
+
+            for (i = 0; i < equationsPinnedSorted.length; i++) {
+                equationsSorted.push(equationsPinnedSorted[i]);
+            }
+
+            for (i = 0; i < equationsNoPinnedSorted.length; i++) {
+                equationsSorted.push(equationsNoPinnedSorted[i]);
+            }
+
+            // var someArray = []
+            // for (var element in someArray) {
+
+            // }
+
+            const today = new Date();
+            for (i = equationsSorted.length - 1; i >= 0; i--) {
+                // remove out date from database
+                var checkDate = Date.parse(equations[i].date)
+                if ((today - checkDate) > 2_592_000_000) {
+                    db.collection('users').doc(currentUser.uid).collection("equations").doc(equationsSorted[i]).delete()
+                    equationsSorted.slice(i, i + 1);                    
+                }
+            }
+
+            const MAX_ELEMENTS = 30;
+
+            try {
+                if (equationsSorted.length > MAX_ELEMENTS) {
+                    // remove extras from database
+                    for (var j = MAX_ELEMENTS; j < equationsSorted.length; j++) {
+                        db.collection('users').doc(currentUser.uid).collection("equations").doc(equationsSorted[j]).delete()
+                    }
+    
+                    while (equationsSorted.length > MAX_ELEMENTS) {
+                        equationsSorted.pop();
+                    }
+                }
+            } catch (exception) {
+                
+            }
+
+            return equationsSorted.map(item => (
+                <Ecuation item={ item } />
+            ));
+        }
+    }
+
+    const sortByDate = (array) => {
+        var di, dj, aux; 
+        for (var i = 0; i < array.length; i++) {
+            for (var j = i+1; j < array.length; j++) {
+                di = Date.parse(array[i].date);
+                dj = Date.parse(array[j].date);
+                if (di < dj) {
+                    aux = array[i];
+                    array[i] = array[j];
+                    array[j] = aux;
+                }
+            }
+        }
+        return array;
     }
 
     return (
