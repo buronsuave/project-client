@@ -42,6 +42,8 @@ const Preview = () => {
 
         await addEquation(send)
         const res = await request(options);
+        console.log(res)
+
         if (res.status !== 'ok') {
             alert(res.status);
         } else {

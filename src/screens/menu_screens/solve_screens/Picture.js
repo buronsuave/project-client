@@ -1,16 +1,23 @@
 import React, { useCallback } from "react";
 import Navbar from "../../menu_components/Navbar";
+const request = require("request-promise");
 
-const https = require("https");
-const options = {
-    hostname: "localhost", 
-    port: 4001, 
-    path: "/", 
-    method: "POST", 
-    headers: {
+async function postData(url = '', data = {}) {
+    const response = await fetch(url, {
+      method: 'POST', 
+      mode: 'cors', 
+      cache: 'no-cache', 
+      credentials: 'same-origin',
+      headers: {
         'Content-Type': 'application/json'
-    }
-}
+      },
+      redirect: 'follow',
+      referrerPolicy: 'no-referrer',
+      body: JSON.stringify(data)
+    });
+    
+    return response.json(); 
+  }
 
 const Picture = ({ history }) => {
     const handleSendPicture = useCallback(
@@ -18,63 +25,44 @@ const Picture = ({ history }) => {
             event.preventDefault();
             try {
                 var imageFile = document.getElementById("file");
-                if (imageFile.files.length) {
+                if (imageFile.files.length > 0) {
                     var reader = new FileReader();
                     reader.onload = (e) => {
-                        var image = e.target.result;
-                        var image64 = new Buffer(image).toString("base64");
-                        console.log(image64);
+                        var image64 = e.target.result;
+                        image64 = image64.split("data:image/png;base64,")[1]
+                        
+                        const url = "http://127.0.0.1:4000/image/text";
+                        postData(url, { image: image64 })
+                            .then(async data => {
+                                console.log(data);
+                                if (data.status === 'ok') {
+                                    const requestPreview = async () => {
+                                        const options = {
+                                            method: "POST",
+                                            uri: `http://127.0.0.1:4000/parse/latex`, 
+                                            body: { equation: data.text }, 
+                                            json: true
+                                        };
+                                        const res = await request(options);
+                                        if (res.status !== 'ok') {
+                                            alert(res.status);
+                                        } else {
+                                            history.push(`/preview/${res.equation}`);
+                                        }
+                                    }
 
-                        var data = JSON.stringify({
-                            image: image64
-                        })
-
-                        const req = https.request(options, res => {
-                            console.log(`statusCode: ${res.statusCode}`);
-
-                            res.on("data", d => {
-                                console.log(d);
+                                    await requestPreview();
+                                }
                             });
-                        })
-
-                        req.on("error", e => {
-                            console.log(e);
-                        });
-
-                        req.write(data);
                     }
                     
-                    reader.readAsBinaryString(imageFile.files[0]);
+                    reader.readAsDataURL(imageFile.files[0]);
                 }   
-                // const image_base64 = new Buffer(image).toString("base64");
-                // const data = {
-                //     image: image_base64
-                // }  
-                
-                // const req = https.request(options, res => {
-                //     console.log(`status code: ${res.statusCode}`);
-
-                //     res.on('data', d => {
-                //         console.log(d);
-                //         return <Redirect to={{
-                //             pathname: "../result",
-                //             state: { res: res }
-                //         }} />
-                //     })
-
-                //     res.on('error', e => {
-                //         console.log(e);
-                //     })
-                // });
-
-                // req.write(data);
-                // req.end();
-
             } catch (error)
             {
                 alert(error);
             }
-        }, []
+        }, [history]
     )
 
     return (
