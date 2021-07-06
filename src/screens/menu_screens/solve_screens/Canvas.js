@@ -1,7 +1,28 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+const request = require("request-promise");
 
-export function Canvas() {
+const Canvas = ({ history }) => {
+
+  async function postData(url = '', data = {}) {
+    const response = await fetch(url, {
+      method: 'POST', 
+      mode: 'cors', 
+      cache: 'no-cache', 
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      redirect: 'follow',
+      referrerPolicy: 'no-referrer',
+      body: JSON.stringify(data)
+    });
+    
+    return response.json(); 
+  }
+
     const [isDrawing, setIsDrawing] = useState(false)
+    const [ canvasHistory, setCanvasHistory ] = useState([new ImageData(window.innerWidth, window.innerHeight)]);
+
     const canvasRef = useRef(null);
     const contextRef = useRef(null);
   
@@ -26,13 +47,14 @@ export function Canvas() {
       canvas.height = window.innerHeight;
       canvas.style.width = `${window.innerWidth/2}px`;
       canvas.style.height = `${window.innerHeight/2}px`;
-      canvas.style.background = "black";
+      canvas.style.background = "white";
   
       const context = canvas.getContext("2d")
+
       context.scale(2, 2);
       context.lineCap = "round";
-      context.strokeStyle = "white";
-      context.lineWidth = 5;
+      context.strokeStyle = "black";
+      context.lineWidth = 2;
       contextRef.current = context;
     }, []);
   
@@ -42,7 +64,6 @@ export function Canvas() {
             return;
         }   
 
-        console.log(nativeEvent);
         const { offsetX, offsetY } = nativeEvent;
         contextRef.current.beginPath();
         contextRef.current.moveTo(offsetX, offsetY);
@@ -55,7 +76,6 @@ export function Canvas() {
             return;
         }
 
-        console.log(nativeEvent.touches[0]);
         const { clientX, clientY } = nativeEvent.touches[0];
 
         const canvas = canvasRef.current;
@@ -68,6 +88,13 @@ export function Canvas() {
   
     const finishDrawing = () => {
       contextRef.current.closePath();
+      const canvas = canvasRef.current;
+      const context = canvas.getContext("2d")
+
+      var data = context.getImageData(0, 0, canvas.width, canvas.height);
+      canvasHistory.push(data);
+      console.log(canvasHistory.length);
+
       setIsDrawing(false);
     };
   
@@ -82,27 +109,92 @@ export function Canvas() {
 
     const drawWithTouch = ({ nativeEvent }) => {
         if (!isDrawing) {
-            return;
-          }
+          return;
+        }
 
-          const { clientX, clientY } = nativeEvent.touches[0];
-          const canvas = canvasRef.current;
-          const { offsetLeft, offsetTop } = recursiveOffsetLeftTop(canvas);
+        const { clientX, clientY } = nativeEvent.touches[0];
+        const canvas = canvasRef.current;
+        const { offsetLeft, offsetTop } = recursiveOffsetLeftTop(canvas);
 
-          contextRef.current.lineTo(clientX - offsetLeft, clientY - offsetTop);
-          contextRef.current.stroke();
+        contextRef.current.lineTo(clientX - offsetLeft, clientY - offsetTop);
+        contextRef.current.stroke();
     }
 
+    const handleUndo = () => {
+      if (canvasHistory.length === 1) {
+        return;
+      }
+
+      var prevState = canvasHistory[canvasHistory.length - 2];
+      canvasHistory.pop();
+      
+      const canvas = canvasRef.current;
+      const context = canvas.getContext("2d");
+      context.putImageData(prevState, 0, 0);
+    }
+
+    const handleDelete = () => {
+      setCanvasHistory([new ImageData(window.innerWidth, window.innerHeight)]);
+      const canvas = canvasRef.current;
+      const context = canvas.getContext("2d");
+      context.putImageData(canvasHistory[0], 0, 0);
+    }
+
+    const handleSend = useCallback(() => {
+      var canvas = document.getElementById('canvas');
+      var imgData = canvas.toDataURL();
+      imgData = imgData.split("data:image/png;base64,")[1]
+      const url = "http://127.0.0.1:4000/image/text";
+          postData(url, { image: imgData })
+              .then(async data => {
+                  console.log(data);
+                  if (data.status === 'ok') {
+                      const requestPreview = async () => {
+                          const options = {
+                              method: "POST",
+                              uri: `http://127.0.0.1:4000/parse/latex`, 
+                              body: { equation: data.text }, 
+                              json: true
+                          };
+                          const res = await request(options);
+                          if (res.status !== 'ok') {
+                              alert(res.status);
+                          } else {
+                              history.push(`/preview/${res.equation}`);
+                          }
+                      }
+                      await requestPreview();
+                  }
+              });
+    }, [history]);
+
   return (
-    <canvas
-      onMouseDown={startDrawing}
-      onTouchStart={startDrawingWithTouch}
-      onMouseUp={finishDrawing}
-      onTouchEnd={finishDrawing}
-      onMouseMove={draw}
-      onTouchMove={drawWithTouch}
-      ref={canvasRef}
-    />
+    <>
+      <canvas
+        onMouseDown={startDrawing}
+        onTouchStart={startDrawingWithTouch}
+        onMouseUp={finishDrawing}
+        onTouchEnd={finishDrawing}
+        onMouseMove={draw}
+        onTouchMove={drawWithTouch}
+        ref={canvasRef}
+        id="canvas"
+      /><br></br><br></br>
+      <div class="row justify-content-start">
+        <div class="col-6 col-sm-1">
+          <button className="btn btn-primary" onClick={ handleUndo }>Undo</button>
+        </div>
+        <div class="col-6 col-sm-1">
+          <button className="btn btn-danger" onClick={ handleDelete }>Clear</button>
+        </div>
+        <div class="col-6 col-sm-1">
+          <button className="btn btn-success" onClick={ handleSend }>Send</button>
+        </div>
+      </div>
+    </>
   );
 }
 
+export default Canvas;
+
+  
