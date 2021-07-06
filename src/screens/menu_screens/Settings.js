@@ -4,8 +4,14 @@ import app from "../../base";
 import "./Settings.css";
 import { AuthContext } from "../../auth";
 import Navbar from "../menu_components/Navbar";
+import Popup from "../global_components/Popup";
 
 const Settings = ({ item }) => {
+
+    const [alertPopup, setAlertPopup] = useState(false);
+    const [ currentError, setCurrentError ] = useState(null);
+    const [ currentTitle, setCurrentTitle ] = useState(null);
+
     const { currentUser } = useContext(AuthContext);
     const [currentUserType, setCurrentUserType] = useState(null);
     const [currentSubscribed, setCurrentSubscribed] = useState(null);
@@ -27,7 +33,9 @@ const Settings = ({ item }) => {
                     setCurrentUserType(docs[0].type);
                     setCurrentSubscribed(docs[0].isSubscribed);
                 } catch (someError) {
-
+                    setAlertPopup(true)
+                    setCurrentTitle("Error")
+                    setCurrentError(someError.message)
                 }
             })
         }
@@ -48,7 +56,7 @@ const Settings = ({ item }) => {
                 <div class="form-check">
                     <input name="isSubscribed" class="form-check-input" type="checkbox" id="defaultCheck1" defaultChecked></input>
                     <label>I want to receive updates in my email</label>
-                </div>
+                </div>   
                 </>
             );
         } else if (currentUserType === "teacher" && !currentSubscribed) {
@@ -115,12 +123,16 @@ const Settings = ({ item }) => {
             try {
                 await currentUser.reauthenticateWithCredential(credentials);
             } catch (passError) {
-                alert("Password is incorrect");
+                setAlertPopup(true)
+                setCurrentTitle("Error")
+                setCurrentError("Password is incorrect")
                 return;
             }
 
             if (password.value === newPassword.value) {
-                alert("New password can not be the current password");
+                setAlertPopup(true)
+                setCurrentTitle("Error")
+                setCurrentError("New password can not be the current password")
                 return;
             }
 
@@ -130,12 +142,16 @@ const Settings = ({ item }) => {
                 var regularExpression = /^[a-zA-Z0-9]{6,16}$/;
 
                 if (newPassword.length < minNumberofChars || newPassword.length > maxNumberofChars) {
-                    alert("Bad length");
+                    setAlertPopup(true)
+                    setCurrentTitle("Error")
+                    setCurrentError("Bad length")
                     return false;
                 }
 
                 if (!regularExpression.test(newPassword)) {
-                    alert("Bad chars");
+                    setAlertPopup(true)
+                    setCurrentTitle("Error")
+                    setCurrentError("Bad chars")
                     return false;
                 }
 
@@ -143,12 +159,16 @@ const Settings = ({ item }) => {
             }
 
             if (newPassword.value !== "" && !validatePassword(newPassword.value)) {
-                alert("Invalid new password")
+                setAlertPopup(true)
+                setCurrentTitle("Error")
+                setCurrentError("Invalid new password")
                 return;
             }
 
             if (newPassword.value !== "" && newPassword.value !== confirmNewPassword.value) {
-                alert("New Passwords dont match")
+                setAlertPopup(true)
+                setCurrentTitle("Error")
+                setCurrentError("New Passwords dont match")
                 return;
             }
 
@@ -171,7 +191,9 @@ const Settings = ({ item }) => {
             password.value = "";
             newPassword.value = "";
             confirmNewPassword.value = "";
-            alert("The changes were successful");
+            setAlertPopup(true)
+            setCurrentTitle("Success")
+            setCurrentError("The changes were successful")
 
         }, [item]
     );
@@ -204,6 +226,10 @@ const Settings = ({ item }) => {
                     </fieldset>
                 </form>
             </div>
+            <Popup trigger={alertPopup} setTrigger={setAlertPopup}>
+                <h3 style={{ color:"black" }}> { currentTitle } </h3>
+                <p style={{ color:"black" }}> { currentError } </p>
+            </Popup> 
         </div>
     );
 }

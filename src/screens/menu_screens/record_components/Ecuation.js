@@ -4,10 +4,16 @@ import { XIcon, PinIcon } from '@primer/octicons-react'
 import app from "../../../base"
 import "./Ecuation.css"
 import { AuthContext } from "../../../auth";
+import Popup from "../../global_components/Popup";
 
 const MathJax = require('react-mathjax')
 
 const Ecuation = ({ item }) => {
+
+  const [ alertPopup, setAlertPopup ] = useState(false);
+  const [ currentTitle, setCurrentTitle ] = useState(null);
+  const [ currentError, setCurrentError ] = useState(null);
+
   const eq = item.equation;
   const date = item.date
   const { currentUser } = useContext(AuthContext);
@@ -15,11 +21,12 @@ const Ecuation = ({ item }) => {
   const [pinned, setPinned] = useState(item.pinned)
 
   const onDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this link?')) {
+      setAlertPopup(true)
+      setCurrentTitle("Success")
+      setCurrentError("Equation eliminated successfully")
       const db = app.firestore()
       await db.collection('users').doc(currentUser.uid).collection("equations").doc(item.id).delete()
       window.location.reload(false); 
-    }
   }
 
   const onUpdate = async () => {
@@ -62,6 +69,10 @@ const Ecuation = ({ item }) => {
         </small>
       </div>
       <p class="mb-1">{date}</p>
+      <Popup trigger={alertPopup} setTrigger={setAlertPopup}>
+        <h3 style={{ color:"black" }}> { currentTitle } </h3>
+        <p style={{ color:"black" }}> { currentError } </p>
+      </Popup>
     </Link>
   )
 }

@@ -1,5 +1,7 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import Navbar from "../../menu_components/Navbar";
+import Popup from "../../global_components/Popup";
+
 const request = require("request-promise");
 
 async function postData(url = '', data = {}) {
@@ -20,6 +22,10 @@ async function postData(url = '', data = {}) {
   }
 
 const Picture = ({ history }) => {
+
+    const [alertPopup, setAlertPopup] = useState(false);
+    const [ currentError, setCurrentError ] = useState(null);
+
     const videoRef = useRef(null);
     const photoRef = useRef(null);
     var hasPic = false;
@@ -66,7 +72,8 @@ const Picture = ({ history }) => {
                                         };
                                         const res = await request(options);
                                         if (res.status !== 'ok') {
-                                            alert(res.status);
+                                            setAlertPopup(true)
+                                            setCurrentError(res.status)
                                         } else {
                                             history.push(`/preview/${res.equation}`);
                                         }
@@ -82,7 +89,8 @@ const Picture = ({ history }) => {
                     var imgData = canvas.toDataURL();
                     imgData = imgData.split("data:image/png;base64,")[1]
                     if (!hasPic) {
-                        alert("Please upload a file or take a picture");
+                        setAlertPopup(true)
+                        setCurrentError("Please upload a file or take a picture")
                         return;
                     }
 
@@ -100,7 +108,8 @@ const Picture = ({ history }) => {
                                         };
                                         const res = await request(options);
                                         if (res.status !== 'ok') {
-                                            alert(res.status);
+                                            setAlertPopup(true)
+                                            setCurrentError(res.status)
                                         } else {
                                             history.push(`/preview/${res.equation}`);
                                         }
@@ -112,7 +121,8 @@ const Picture = ({ history }) => {
                 }
             } catch (error)
             {
-                alert(error);
+                setAlertPopup(true)
+                setCurrentError(error)
             }
         }, [history]
     )
@@ -155,6 +165,10 @@ const Picture = ({ history }) => {
                 <button type="button" className="btn btn-secondary" onClick={takePhoto}>Take Picture</button><br></br><br></br>
                 <canvas id="picture" ref={photoRef}></canvas>
             </div>
+            <Popup trigger={alertPopup} setTrigger={setAlertPopup}>
+                <h3 style={{ color:"black" }}> Error </h3>
+                <p style={{ color:"black" }}> { currentError } </p>
+            </Popup>
         </div>
     )
 }

@@ -1,11 +1,15 @@
-import React, { useCallback, useContext } from "react";
+import React, { useState, useCallback, useContext } from "react";
 import { withRouter, Redirect } from "react-router";
 import app from "../base";
 import { AuthContext } from "../auth";
+import Popup from "./global_components/Popup";
 
 import "./Login.css";
 
 const Login = ( {history} ) => {
+
+    const [alertPopup, setAlertPopup] = useState(false);
+    const [ currentError, setCurrentError ] = useState(null);
 
     const handleLogin = useCallback(
         async event => {
@@ -15,7 +19,8 @@ const Login = ( {history} ) => {
                 await app.auth().signInWithEmailAndPassword(email.value, password.value);
                 history.push("/");
             } catch (error) {
-                alert(error);
+                setAlertPopup(true)
+                setCurrentError(error.message)
             }
         }, 
         [history]
@@ -46,6 +51,10 @@ const Login = ( {history} ) => {
                     </div>
                 </fieldset>
             </form>
+            <Popup trigger={alertPopup} setTrigger={setAlertPopup}>
+                <h3 style={{ color:"black" }}> Error </h3>
+                <p style={{ color:"black" }}> { currentError } </p>
+            </Popup>
         </div>
     );
 };

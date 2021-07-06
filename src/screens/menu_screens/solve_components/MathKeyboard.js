@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
+import Popup from '../../global_components/Popup';
 
 const request = require("request-promise");
 
 const MathKeyboard = ({ history }) => {
+
+    const [alertPopup, setAlertPopup] = useState(false);
+    const [ currentError, setCurrentError ] = useState(null);
 
     const writeChar = (char) => {
         return () => {
@@ -64,7 +68,8 @@ const MathKeyboard = ({ history }) => {
         
         const res = await request(options);
         if (res.status !== 'ok') {
-            alert(res.status);
+            setAlertPopup(true)
+            setCurrentError(res.status)
         } else {
             history.push(`/preview/${res.equation}`);
         }
@@ -262,6 +267,10 @@ const MathKeyboard = ({ history }) => {
                     </button>
                 </div>
             </div><br/>
+            <Popup trigger={alertPopup} setTrigger={setAlertPopup}>
+                <h3 style={{ color:"black" }}> Error </h3>
+                <p style={{ color:"black" }}> { currentError } </p>
+            </Popup>
         </div>
     );
 }

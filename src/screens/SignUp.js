@@ -1,8 +1,12 @@
-import React, { useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { withRouter } from "react-router";
 import app from "../base";
+import Popup from "./global_components/Popup";
 
 const SignUp = ({ history }) => {
+
+    const [alertPopup, setAlertPopup] = useState(false);
+    const [ currentError, setCurrentError ] = useState(null);
 
     const handleSignUp = useCallback(
         async event => {
@@ -26,12 +30,14 @@ const SignUp = ({ history }) => {
                 var regularExpression  = /^[a-zA-Z0-9]{6,16}$/;
 
                 if (newPassword.length < minNumberofChars || newPassword.length > maxNumberofChars){
-                    alert("Bad length");
+                    setAlertPopup(true)
+                    setCurrentError("Bad lenght")
                     return false;
                 }
 
                 if (!regularExpression.test(newPassword)) {
-                    alert("Bad chars");
+                    setAlertPopup(true)
+                    setCurrentError("Bad chars")
                     return false;
                 }
 
@@ -39,12 +45,14 @@ const SignUp = ({ history }) => {
             }
             
             if (!validatePassword(password.value)) {
-                alert("Invalid password")
+                setAlertPopup(true)
+                setCurrentError("Invalid password")
                 return;
             }
 
             if (password.value !== confirmPassword.value) {
-                alert("Passwords dont match")
+                setAlertPopup(true)
+                setCurrentError("Passwords dont match")
                 return;
             }
 
@@ -54,7 +62,8 @@ const SignUp = ({ history }) => {
                     await addUser(userType, isSubscribed, newUser.user.uid);
                     history.push("/");
                 } catch (error) {
-                    alert(error);
+                    setAlertPopup(true)
+                    setCurrentError(error.message)
                 }
             }
             
@@ -97,6 +106,10 @@ const SignUp = ({ history }) => {
                     </div>
                 </fieldset>
             </form>
+            <Popup trigger={alertPopup} setTrigger={setAlertPopup}>
+                <h3 style={{ color:"black" }}> Error </h3>
+                <p style={{ color:"black" }}> { currentError } </p>
+            </Popup>
         </div>
     );
 };

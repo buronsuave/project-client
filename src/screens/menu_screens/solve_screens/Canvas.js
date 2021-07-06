@@ -1,7 +1,12 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
+import Popup from "../../global_components/Popup";
+
 const request = require("request-promise");
 
 const Canvas = ({ history }) => {
+
+  const [alertPopup, setAlertPopup] = useState(false);
+  const [ currentError, setCurrentError ] = useState(null);
 
   async function postData(url = '', data = {}) {
     const response = await fetch(url, {
@@ -158,7 +163,8 @@ const Canvas = ({ history }) => {
                           };
                           const res = await request(options);
                           if (res.status !== 'ok') {
-                              alert(res.status);
+                              setAlertPopup(true)
+                              setCurrentError(res.status)                              
                           } else {
                               history.push(`/preview/${res.equation}`);
                           }
@@ -191,6 +197,10 @@ const Canvas = ({ history }) => {
           <button className="btn btn-success" onClick={ handleSend }>Send</button>
         </div>
       </div>
+      <Popup trigger={alertPopup} setTrigger={setAlertPopup}>
+        <h3 style={{ color:"black" }}> Error </h3>
+        <p style={{ color:"black" }}> { currentError } </p>
+      </Popup>
     </>
   );
 }
