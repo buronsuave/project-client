@@ -57,18 +57,18 @@ const Record = () => {
                 equationsSorted.push(equationsNoPinnedSorted[i]);
             }
 
-            // var someArray = []
-            // for (var element in someArray) {
-
-            // }
-
             const today = new Date();
             for (i = equationsSorted.length - 1; i >= 0; i--) {
                 // remove out date from database
-                var checkDate = Date.parse(equations[i].date)
-                if ((today - checkDate) > 2_592_000_000) {
-                    db.collection('users').doc(currentUser.uid).collection("equations").doc(equationsSorted[i]).delete()
-                    equationsSorted.slice(i, i + 1);                    
+                var checkDate = Date.parse(equationsSorted[i].date)
+
+                // 60_000 = 1 minute
+                // 3_600_000 = 1 hour
+                // 86_400_000 = 1 day
+                // 2_592_000_000 = 30 days
+                if (((today - checkDate) > 2_592_000_000) && !equationsSorted[i].pinned) {
+                    db.collection('users').doc(currentUser.uid).collection('equations').doc(equationsSorted[i].id).delete()
+                    equationsSorted.splice(i, 1)
                 }
             }
 
@@ -78,7 +78,7 @@ const Record = () => {
                 if (equationsSorted.length > MAX_ELEMENTS) {
                     // remove extras from database
                     for (var j = MAX_ELEMENTS; j < equationsSorted.length; j++) {
-                        db.collection('users').doc(currentUser.uid).collection("equations").doc(equationsSorted[j]).delete()
+                        db.collection('users').doc(currentUser.uid).collection("equations").doc(equationsSorted[j].id).delete()
                     }
     
                     while (equationsSorted.length > MAX_ELEMENTS) {
