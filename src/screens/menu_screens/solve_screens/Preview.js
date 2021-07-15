@@ -4,6 +4,7 @@ import { useParams } from 'react-router'
 import Navbar from "../../menu_components/Navbar";
 import app from "../../../base";
 import { AuthContext } from "../../../auth";
+import { WaitingScreen } from '../../../alerts/WaitingScreen';
 
 const request = require("request-promise");
 
@@ -12,8 +13,9 @@ const MathJax = require('react-mathjax')
 const Preview = () => {
     const { currentUser } = useContext(AuthContext);
     const { equation } = useParams();
-    const [solution, setSolution] = useState([]);
-    const [showLatex, setShowLatex] = useState(false);
+    const [ solution, setSolution ] = useState([]);
+    const [ showLatex, setShowLatex ] = useState(false);
+    const [ isWaiting, setIsWaiting ] = useState(false);
 
     const send = equation.replace("%2F", "/");
 
@@ -41,8 +43,8 @@ const Preview = () => {
         };
 
         await addEquation(send)
+        setIsWaiting(true);
         const res = await request(options);
-        console.log(res)
 
         if (res.status !== 'ok') {
             alert(res.status);
@@ -61,6 +63,7 @@ const Preview = () => {
                 solutionAux.push(stepObject)
             }
             setSolution(solutionAux);
+            setIsWaiting(false);
         }
     }
 
@@ -154,6 +157,7 @@ const Preview = () => {
                 {renderLaTeXButton()}
                 {renderLaTeXBox()}
             </div>
+            { new WaitingScreen(isWaiting, setIsWaiting).display() }
         </div>
     )
 }

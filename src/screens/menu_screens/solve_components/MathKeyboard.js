@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Popup from '../../global_components/Popup';
+import { InterpretationAnomaly } from '../../../anomalies/InterpretationAnomaly';
 
 const request = require("request-promise");
 
@@ -135,16 +135,16 @@ const MathKeyboard = ({ history }) => {
                     <button type="button" className="btn btn-primary btn-lg btn-block" onClick={ clear }>Clear</button>
                 </div>
                 <div className="col-6 col-sm-2">
-                    <button type="button" className="btn btn-info btn-lg btn-block" onClick={ writeChar("^") }>^</button>
+                    <button type="button" className="btn btn-danger btn-lg btn-block" onClick={ writeChar("7") }>7</button>
                 </div>
                 <div className="col-6 col-sm-2">
-                    <button type="button" className="btn btn-info btn-lg btn-block" onClick={ writeChar("/") }>/</button>
+                    <button type="button" className="btn btn-danger btn-lg btn-block" onClick={ writeChar("8") }>8</button>
                 </div>
                 <div className="col-6 col-sm-2">
-                    <button type="button" className="btn btn-info btn-lg btn-block" onClick={ writeChar("*") }>*</button>
+                    <button type="button" className="btn btn-danger btn-lg btn-block" onClick={ writeChar("9") }>9</button>
                 </div>
                 <div className="col-6 col-sm-2">
-                    <button type="button" className="btn btn-info btn-lg btn-block" onClick={ writeChar("-") }>-</button>
+                    <button type="button" className="btn btn-light btn-lg btn-block" onClick={ writeChar("sin") }>sin</button>
                 </div>
                 <div className="col-6 col-sm-2">
                     <button type="button" className="btn btn-info btn-lg btn-block" onClick={ writeChar("+") }>+</button>
@@ -156,29 +156,6 @@ const MathKeyboard = ({ history }) => {
                     <button type="button" className="btn btn-primary btn-lg btn-block" onClick={ remove }>Remove</button>
                 </div>
                 <div className="col-6 col-sm-2">
-                    <button type="button" className="btn btn-danger btn-lg btn-block" onClick={ writeChar("7") }>7</button>
-                </div>
-                <div className="col-6 col-sm-2">
-                    <button type="button" className="btn btn-danger btn-lg btn-block" onClick={ writeChar("8") }>8</button>
-                </div>
-                <div className="col-6 col-sm-2">
-                    <button type="button" className="btn btn-danger btn-lg btn-block" onClick={ writeChar("9") }>9</button>
-                </div>
-                <div className="col-6 col-sm-2">
-                    <button type="button" className="btn btn-success btn-lg btn-block" onClick={ writeChar("x") }>x</button>
-                </div>
-                <div className="col-6 col-sm-2">
-                    <button type="button" className="btn btn-success btn-lg btn-block" onClick={ writeChar("y") }>y</button>
-                </div>
-            </div><br/>
-
-            <div className="row">
-                <div className="col-6 col-sm-2">
-                    <button type="button" className="btn btn-primary btn-lg btn-block" onClick={ moveLeft }>
-                        <i className="fa fa-arrow-left"></i>
-                    </button>
-                </div>
-                <div className="col-6 col-sm-2">
                     <button type="button" className="btn btn-danger btn-lg btn-block" onClick={ writeChar("4") }>4</button>
                 </div>
                 <div className="col-6 col-sm-2">
@@ -188,17 +165,17 @@ const MathKeyboard = ({ history }) => {
                     <button type="button" className="btn btn-danger btn-lg btn-block" onClick={ writeChar("6") }>6</button>
                 </div>
                 <div className="col-6 col-sm-2">
-                    <button type="button" className="btn btn-success btn-lg btn-block" onClick={ writeChar("E") }>E</button>
+                    <button type="button" className="btn btn-light btn-lg btn-block" onClick={ writeChar("cos") }>cos</button>
                 </div>
                 <div className="col-6 col-sm-2">
-                    <button type="button" className="btn btn-success btn-lg btn-block" onClick={ writeChar("pi")}>pi</button>
+                    <button type="button" className="btn btn-info btn-lg btn-block" onClick={ writeChar("-") }>-</button>
                 </div>
             </div><br/>
 
             <div className="row">
                 <div className="col-6 col-sm-2">
-                    <button type="button" className="btn btn-primary btn-lg btn-block" onClick={ moveRight }>
-                        <i className="fa fa-arrow-right"></i>
+                    <button type="button" className="btn btn-primary btn-lg btn-block" onClick={ moveLeft }>
+                        <i className="fa fa-arrow-left"></i>
                     </button>
                 </div>
                 <div className="col-6 col-sm-2">
@@ -211,16 +188,18 @@ const MathKeyboard = ({ history }) => {
                     <button type="button" className="btn btn-danger btn-lg btn-block" onClick={ writeChar("3") }>3</button>
                 </div>
                 <div className="col-6 col-sm-2">
-                    <button type="button" className="btn btn-secondary btn-lg btn-block" onClick={ writeChar("ln") }>ln</button>
+                    <button type="button" className="btn btn-light btn-lg btn-block" onClick={ writeChar("tan") }>tan</button>
                 </div>
                 <div className="col-6 col-sm-2">
-                    <button type="button" className="btn btn-secondary btn-lg btn-block" onClick={ writeChar("sin") }>sin</button>
+                    <button type="button" className="btn btn-info btn-lg btn-block" onClick={ writeChar("*")}>*</button>
                 </div>
             </div><br/>
 
             <div className="row">
                 <div className="col-6 col-sm-2">
-                    <button type="button" className="btn btn-warning btn-lg btn-block" onClick={ writeChar(",") }>,</button>
+                    <button type="button" className="btn btn-primary btn-lg btn-block" onClick={ moveRight }>
+                        <i className="fa fa-arrow-right"></i>
+                    </button>
                 </div>
                 <div className="col-6 col-sm-2">
                     <button type="button" className="btn btn-danger btn-lg btn-block" onClick={ writeChar("0") }>0</button>
@@ -232,10 +211,31 @@ const MathKeyboard = ({ history }) => {
                     <button type="button" className="btn btn-secondary btn-lg btn-block" onClick={ writeChar("D") }>D</button>
                 </div>
                 <div className="col-6 col-sm-2">
-                    <button type="button" className="btn btn-secondary btn-lg btn-block" onClick={ writeChar("cos") }>cos</button>
+                    <button type="button" className="btn btn-light btn-lg btn-block" onClick={ writeChar("sec") }>sec</button>
                 </div>
                 <div className="col-6 col-sm-2">
-                    <button type="button" className="btn btn-secondary btn-lg btn-block" onClick={ writeChar("tan") }>tan</button>
+                    <button type="button" className="btn btn-info btn-lg btn-block" onClick={ writeChar("/") }>/</button>
+                </div>
+            </div><br/>
+
+            <div className="row">
+                <div className="col-6 col-sm-2">
+                    <button type="button" className="btn btn-warning btn-lg btn-block" onClick={ writeChar(",") }>,</button>
+                </div>
+                <div className="col-6 col-sm-2">
+                    <button type="button" className="btn btn-success btn-lg btn-block" onClick={ writeChar("x") }>x</button>
+                </div>
+                <div className="col-6 col-sm-2">
+                    <button type="button" className="btn btn-success btn-lg btn-block" onClick={ writeChar("E") }>E</button>
+                </div>
+                <div className="col-6 col-sm-2">
+                    <button type="button" className="btn btn-secondary btn-lg btn-block" onClick={ writeChar("ln") }>ln</button>
+                </div>
+                <div className="col-6 col-sm-2">
+                    <button type="button" className="btn btn-light btn-lg btn-block" onClick={ writeChar("csc") }>csc</button>
+                </div>
+                <div className="col-6 col-sm-2">
+                    <button type="button" className="btn btn-info btn-lg btn-block" onClick={ writeChar("^") }>^</button>
                 </div>
             </div><br/>
 
@@ -247,16 +247,16 @@ const MathKeyboard = ({ history }) => {
                     <button type="button" className="btn btn-warning btn-lg btn-block" onClick={ writeChar(")") }>)</button>
                 </div>
                 <div className="col-6 col-sm-2">
+                    <button type="button" className="btn btn-success btn-lg btn-block" onClick={ writeChar("y") }>y</button>
+                </div>
+                <div className="col-6 col-sm-2">
+                    <button type="button" className="btn btn-success btn-lg btn-block" onClick={ writeChar("pi") }>pi</button>
+                </div>
+                <div className="col-6 col-sm-2">
                     <button type="button" className="btn btn-secondary btn-lg btn-block" onClick={ writeChar("sqrt") }>sqrt</button>
                 </div>
                 <div className="col-6 col-sm-2">
-                    <button type="button" className="btn btn-secondary btn-lg btn-block" onClick={ writeChar("sec") }>sec</button>
-                </div>
-                <div className="col-6 col-sm-2">
-                    <button type="button" className="btn btn-secondary btn-lg btn-block" onClick={ writeChar("csc") }>csc</button>
-                </div>
-                <div className="col-6 col-sm-2">
-                    <button type="button" className="btn btn-secondary btn-lg btn-block" onClick={ writeChar("cot") }>cot</button>
+                    <button type="button" className="btn btn-light btn-lg btn-block" onClick={ writeChar("cot") }>cot</button>
                 </div>
                 <div className="col-6 col-sm-1">
                     <button type="button" className="btn btn-info btn-lg btn-block" onClick={ writeChar("=") }>=</button>
@@ -267,10 +267,7 @@ const MathKeyboard = ({ history }) => {
                     </button>
                 </div>
             </div><br/>
-            <Popup trigger={alertPopup} setTrigger={setAlertPopup}>
-                <h3 style={{ color:"black" }}> Error </h3>
-                <p style={{ color:"black" }}> { currentError } </p>
-            </Popup>
+            { new InterpretationAnomaly(currentError, alertPopup, setAlertPopup).display() }
         </div>
     );
 }
