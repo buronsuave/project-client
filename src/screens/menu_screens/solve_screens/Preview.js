@@ -5,9 +5,10 @@ import Navbar from "../../menu_components/Navbar";
 import app from "../../../base";
 import { AuthContext } from "../../../auth";
 import { WaitingScreen } from '../../../alerts/WaitingScreen';
+import { GenericAnomaly } from '../../../anomalies/GenericAnomaly'
+import { SolutionTimeoutAnomaly } from '../../../anomalies/SolutionTimeoutAnomaly'
 
 const request = require("request-promise");
-
 const MathJax = require('react-mathjax')
 
 const Preview = () => {
@@ -16,6 +17,9 @@ const Preview = () => {
     const [ solution, setSolution ] = useState([]);
     const [ showLatex, setShowLatex ] = useState(false);
     const [ isWaiting, setIsWaiting ] = useState(false);
+    const [ hasGenericAnomaly, setHasGenericAnomaly ] = useState(false);
+    const [ genericAnomalyText, setGenericAnomalyText ] = useState(null);
+    const [ isOnTimeout, setIsOnTimeout ] = useState(false);
 
     const send = equation.replace("%2F", "/");
 
@@ -43,28 +47,43 @@ const Preview = () => {
         };
 
         await addEquation(send)
+        var flagWait = true;
         setIsWaiting(true);
-        const res = await request(options);
 
-        if (res.status !== 'ok') {
-            alert(res.status);
-        } else {
-            var solutionAux = []
-            const aux = res.solution.replaceAll("'", "\"")
-            const jsonSolve = JSON.parse(aux)
-            for (let index = 0; index < jsonSolve.length; index++) {
-                const step = jsonSolve[index];
-                const stepHeader = step[0]
-                var stepLatex = ""
-                for (let j = 0; j < step[1].length; j++) {
-                    stepLatex += step[1][j];
-                }
-                const stepObject = { latex: stepLatex, header: stepHeader }
-                solutionAux.push(stepObject)
+        const res = request(options);
+        
+        setTimeout(() => {
+            if (flagWait) {
+                res.abort()
+                setIsWaiting(false)
+                setIsOnTimeout(true)
             }
-            setSolution(solutionAux);
+        }, 500)
+
+        res.then(body => {
             setIsWaiting(false);
-        }
+            flagWait = false
+            if (body.status !== 'ok') {
+                setGenericAnomalyText(body.status);
+                setIsOnTimeout(false);
+                setHasGenericAnomaly(true);
+            } else {
+                var solutionAux = []
+                const aux = body.solution.replaceAll("'", "\"")
+                const jsonSolve = JSON.parse(aux)
+                for (let index = 0; index < jsonSolve.length; index++) {
+                    const step = jsonSolve[index];
+                    const stepHeader = step[0]
+                    var stepLatex = ""
+                    for (let j = 0; j < step[1].length; j++) {
+                        stepLatex += step[1][j];
+                    }
+                    const stepObject = { latex: stepLatex, header: stepHeader }
+                    solutionAux.push(stepObject)
+                }
+                setSolution(solutionAux);
+            }
+        })
     }
 
     const removeSpecialLatex = (input) => {
@@ -158,6 +177,8 @@ const Preview = () => {
                 {renderLaTeXBox()}
             </div>
             { new WaitingScreen(isWaiting, setIsWaiting).display() }
+            { new GenericAnomaly(genericAnomalyText, hasGenericAnomaly, setHasGenericAnomaly).display() }
+            { new SolutionTimeoutAnomaly(isOnTimeout, setIsOnTimeout).display() }
         </div>
     )
 }
