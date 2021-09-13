@@ -7,18 +7,24 @@ import { AuthContext } from "../../../auth";
 import { WaitingScreen } from '../../../alerts/WaitingScreen';
 import { GenericAnomaly } from '../../../anomalies/GenericAnomaly'
 import { SolutionTimeoutAnomaly } from '../../../anomalies/SolutionTimeoutAnomaly'
+import { CompletenessAnomaly } from '../../../anomalies/CompletenessAnomaly';
+import pdftex from 'texlive';
 
 const request = require("request-promise");
-const MathJax = require('react-mathjax')
+const MathJax = require('react-mathjax');
 
 const Preview = () => {
     const { currentUser } = useContext(AuthContext);
     const { equation } = useParams();
     const [ solution, setSolution ] = useState([]);
     const [ showLatex, setShowLatex ] = useState(false);
+
     const [ isWaiting, setIsWaiting ] = useState(false);
     const [ hasGenericAnomaly, setHasGenericAnomaly ] = useState(false);
+    const [ hasCompletenessAnomaly, setHasCompletenessAnomaly ] = useState(false);
+
     const [ genericAnomalyText, setGenericAnomalyText ] = useState(null);
+    const [ completenessAnomalyText, setCompletenessAnomalyText ] = useState(null);
     const [ isOnTimeout, setIsOnTimeout ] = useState(false);
 
     const send = equation.replace("%2F", "/");
@@ -58,15 +64,40 @@ const Preview = () => {
                 setIsWaiting(false)
                 setIsOnTimeout(true)
             }
-        }, 500)
+        }, 30000)
 
         res.then(body => {
-            setIsWaiting(false);
+            setIsWaiting(false)
             flagWait = false
             if (body.status !== 'ok') {
-                setGenericAnomalyText(body.status);
-                setIsOnTimeout(false);
-                setHasGenericAnomaly(true);
+                if (body.exception === 'completeness') {
+                    setCompletenessAnomalyText(body.status);
+                    setIsOnTimeout(false);
+                    setHasGenericAnomaly(false);
+                    setHasCompletenessAnomaly(true);
+
+                    var solutionAuxCom = []
+                    const aux = body.solution.replaceAll("'", "\"")
+                    const jsonSolve = JSON.parse(aux)
+                    for (let index = 0; index < jsonSolve.length; index++) {
+                        const step = jsonSolve[index];
+                        const stepHeader = step[0]
+                        var stepLatexInc = ""
+                        for (let j = 0; j < step[1].length; j++) {
+                            stepLatexInc += step[1][j];
+                        }
+                        const stepObject = { latex: stepLatexInc, header: stepHeader }
+                        solutionAuxCom.push(stepObject)
+                    }
+                    setSolution(solutionAuxCom);
+
+                } else if (body.exception === 'generic') {
+                    setGenericAnomalyText(body.status);
+                    setIsOnTimeout(false);
+                    setHasCompletenessAnomaly(false);
+                    setHasGenericAnomaly(true);
+                }
+                
             } else {
                 var solutionAux = []
                 const aux = body.solution.replaceAll("'", "\"")
@@ -157,6 +188,32 @@ const Preview = () => {
         }
     }
 
+    const renderLaTeXPdfButton = () => {
+        if (solution.length > 0) {
+            return (
+                <div>
+                    <button onClick={handleLatexToPdf} type="button" className="btn btn-warning">Export to PDF</button>
+                    <br></br>
+                    <br></br>
+                </div>
+            )
+        }
+    }
+
+    const handleLatexToPdf = () => {        
+        var latexCode = "" + 
+        "\\documentclass{article}" +
+        "\\begin{document}" +
+        "\\LaTeX is great!" +
+        "$E = mc^2$" +
+        "\\end{document}";
+        try {
+            (new pdftex().compile(latexCode)).then((pdf) => { console.log(pdf) })
+        } catch (e) {
+            alert(e)
+        }
+    }
+
     return (
         <div>
             <Navbar />
@@ -175,10 +232,12 @@ const Preview = () => {
                 </div>
                 {renderLaTeXButton()}
                 {renderLaTeXBox()}
+                {renderLaTeXPdfButton()}
             </div>
             { new WaitingScreen(isWaiting, setIsWaiting).display() }
             { new GenericAnomaly(genericAnomalyText, hasGenericAnomaly, setHasGenericAnomaly).display() }
             { new SolutionTimeoutAnomaly(isOnTimeout, setIsOnTimeout).display() }
+            { new CompletenessAnomaly(completenessAnomalyText, hasCompletenessAnomaly, setHasCompletenessAnomaly).display() }
         </div>
     )
 }

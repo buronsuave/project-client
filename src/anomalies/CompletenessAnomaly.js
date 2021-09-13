@@ -1,7 +1,7 @@
 import React from "react";
 import Popup from "../screens/global_components/Popup";
 
-export class GenericAnomaly {
+export class CompletenessAnomaly {
     constructor (message, alertPopup, setAlertPopup) {
         this.message = message;
         this.alertPopup = alertPopup;
@@ -11,7 +11,7 @@ export class GenericAnomaly {
     display = () => {
         return (
             <Popup trigger={ this.alertPopup } setTrigger={ this.setAlertPopup }>
-                <h3 style={{ color:"black" }}> Unexpected Error </h3>
+                <h3 style={{ color:"black" }}> Completeness Error </h3>
                 <p style={{ color:"black" }}> { this.message } </p>
             </Popup>
         )
