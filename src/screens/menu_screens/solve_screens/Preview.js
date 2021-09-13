@@ -8,7 +8,7 @@ import { WaitingScreen } from '../../../alerts/WaitingScreen';
 import { GenericAnomaly } from '../../../anomalies/GenericAnomaly'
 import { SolutionTimeoutAnomaly } from '../../../anomalies/SolutionTimeoutAnomaly'
 import { CompletenessAnomaly } from '../../../anomalies/CompletenessAnomaly';
-import pdftex from 'texlive';
+import { ClassificationAnomaly } from '../../../anomalies/ClassificationAnomaly';
 
 const request = require("request-promise");
 const MathJax = require('react-mathjax');
@@ -22,9 +22,11 @@ const Preview = () => {
     const [ isWaiting, setIsWaiting ] = useState(false);
     const [ hasGenericAnomaly, setHasGenericAnomaly ] = useState(false);
     const [ hasCompletenessAnomaly, setHasCompletenessAnomaly ] = useState(false);
+    const [ hasClassificationAnomaly, setHasClassificationAnomaly ] = useState(false);
 
     const [ genericAnomalyText, setGenericAnomalyText ] = useState(null);
     const [ completenessAnomalyText, setCompletenessAnomalyText ] = useState(null);
+    const [ classificationAnomalyText, setClassificationAnomalyText ] = useState(null);
     const [ isOnTimeout, setIsOnTimeout ] = useState(false);
 
     const send = equation.replace("%2F", "/");
@@ -66,15 +68,28 @@ const Preview = () => {
             }
         }, 30000)
 
+        // Catch the response from the server in body object
         res.then(body => {
+            
             setIsWaiting(false)
             flagWait = false
             if (body.status !== 'ok') {
-                if (body.exception === 'completeness') {
+
+                // Classification error
+                if (body.exception === 'classification') {
+                    setClassificationAnomalyText(body.status)
+                    setIsOnTimeout(false);
+                    setHasGenericAnomaly(false);
+                    setHasCompletenessAnomaly(false);
+                    setHasClassificationAnomaly(true);
+
+                // Completeness error
+                } else if (body.exception === 'completeness') {
                     setCompletenessAnomalyText(body.status);
                     setIsOnTimeout(false);
                     setHasGenericAnomaly(false);
                     setHasCompletenessAnomaly(true);
+                    setHasClassificationAnomaly(false);
 
                     var solutionAuxCom = []
                     const aux = body.solution.replaceAll("'", "\"")
@@ -91,13 +106,16 @@ const Preview = () => {
                     }
                     setSolution(solutionAuxCom);
 
+                // Unexpected error
                 } else if (body.exception === 'generic') {
                     setGenericAnomalyText(body.status);
                     setIsOnTimeout(false);
-                    setHasCompletenessAnomaly(false);
                     setHasGenericAnomaly(true);
+                    setHasCompletenessAnomaly(false);
+                    setClassificationAnomalyText(false);
                 }
-                
+            
+            // No Anomaly in solution
             } else {
                 var solutionAux = []
                 const aux = body.solution.replaceAll("'", "\"")
@@ -201,17 +219,17 @@ const Preview = () => {
     }
 
     const handleLatexToPdf = () => {        
-        var latexCode = "" + 
-        "\\documentclass{article}" +
-        "\\begin{document}" +
-        "\\LaTeX is great!" +
-        "$E = mc^2$" +
-        "\\end{document}";
-        try {
-            (new pdftex().compile(latexCode)).then((pdf) => { console.log(pdf) })
-        } catch (e) {
-            alert(e)
-        }
+        // var latexCode = "" + 
+        // "\\documentclass{article}" +
+        // "\\begin{document}" +
+        // "\\LaTeX is great!" +
+        // "$E = mc^2$" +
+        // "\\end{document}";
+        // try {
+        //     (new pdftex().compile(latexCode)).then((pdf) => { console.log(pdf) })
+        // } catch (e) {
+        //     alert(e)
+        // }
     }
 
     return (
@@ -237,6 +255,7 @@ const Preview = () => {
             { new WaitingScreen(isWaiting, setIsWaiting).display() }
             { new GenericAnomaly(genericAnomalyText, hasGenericAnomaly, setHasGenericAnomaly).display() }
             { new SolutionTimeoutAnomaly(isOnTimeout, setIsOnTimeout).display() }
+            { new ClassificationAnomaly(classificationAnomalyText, hasClassificationAnomaly, setHasClassificationAnomaly).display() }
             { new CompletenessAnomaly(completenessAnomalyText, hasCompletenessAnomaly, setHasCompletenessAnomaly).display() }
         </div>
     )
