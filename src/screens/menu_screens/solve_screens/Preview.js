@@ -70,44 +70,38 @@ const Preview = () => {
 
         // Catch the response from the server in body object
         res.then(body => {
-            
+            // Update waiting status flags
             setIsWaiting(false)
             flagWait = false
             if (body.status !== 'ok') {
 
                 // Classification error
                 if (body.exception === 'classification') {
+                    // Anomaly flags and messages
                     setClassificationAnomalyText(body.status)
                     setIsOnTimeout(false);
                     setHasGenericAnomaly(false);
                     setHasCompletenessAnomaly(false);
                     setHasClassificationAnomaly(true);
 
+                    // Set partial solution
+                    deserializeSolution(body.solution)
+
                 // Completeness error
                 } else if (body.exception === 'completeness') {
+                    // Anomaly flags and messages
                     setCompletenessAnomalyText(body.status);
                     setIsOnTimeout(false);
                     setHasGenericAnomaly(false);
                     setHasCompletenessAnomaly(true);
                     setHasClassificationAnomaly(false);
 
-                    var solutionAuxCom = []
-                    const aux = body.solution.replaceAll("'", "\"")
-                    const jsonSolve = JSON.parse(aux)
-                    for (let index = 0; index < jsonSolve.length; index++) {
-                        const step = jsonSolve[index];
-                        const stepHeader = step[0]
-                        var stepLatexInc = ""
-                        for (let j = 0; j < step[1].length; j++) {
-                            stepLatexInc += step[1][j];
-                        }
-                        const stepObject = { latex: stepLatexInc, header: stepHeader }
-                        solutionAuxCom.push(stepObject)
-                    }
-                    setSolution(solutionAuxCom);
+                    // Set partial solution
+                    deserializeSolution(body.solution)
 
                 // Unexpected error
                 } else if (body.exception === 'generic') {
+                    // Anomaly flags and messages
                     setGenericAnomalyText(body.status);
                     setIsOnTimeout(false);
                     setHasGenericAnomaly(true);
@@ -117,20 +111,8 @@ const Preview = () => {
             
             // No Anomaly in solution
             } else {
-                var solutionAux = []
-                const aux = body.solution.replaceAll("'", "\"")
-                const jsonSolve = JSON.parse(aux)
-                for (let index = 0; index < jsonSolve.length; index++) {
-                    const step = jsonSolve[index];
-                    const stepHeader = step[0]
-                    var stepLatex = ""
-                    for (let j = 0; j < step[1].length; j++) {
-                        stepLatex += step[1][j];
-                    }
-                    const stepObject = { latex: stepLatex, header: stepHeader }
-                    solutionAux.push(stepObject)
-                }
-                setSolution(solutionAux);
+                // Set solution
+                deserializeSolution(body.solution)
             }
         })
     }
@@ -164,6 +146,23 @@ const Preview = () => {
                 </div>
             )
         }
+    }
+
+    const deserializeSolution = (solution) => {
+        var solutionAux = []
+        const aux = solution.replaceAll("'", "\"")
+        const jsonSolve = JSON.parse(aux)
+        for (let index = 0; index < jsonSolve.length; index++) {
+            const step = jsonSolve[index];
+            const stepHeader = step[0]
+            var stepLatex = ""
+            for (let j = 0; j < step[1].length; j++) {
+                stepLatex += step[1][j];
+            }
+            const stepObject = { latex: stepLatex, header: stepHeader }
+            solutionAux.push(stepObject)
+        }
+        setSolution(solutionAux);
     }
 
     const renderSolve = () => {
