@@ -1,10 +1,2 @@
 # PWA for ODE (Client side)
-
-## Part I: PWA structre
-Create a PWA folder structure 
-
-## Part II: React app
-Create a new React app
-
-## Part III: Deploy app
-Once it's done, deploy to Netlify
+User interface developed with React for the PWA for the ODEs solution. Bootstrap is used to give a standard style to the different views of the application. Establishes communication with the server through http requests
