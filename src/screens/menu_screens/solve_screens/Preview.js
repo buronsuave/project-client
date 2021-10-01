@@ -28,6 +28,9 @@ const Preview = () => {
     const [ completenessAnomalyText, setCompletenessAnomalyText ] = useState(null);
     const [ classificationAnomalyText, setClassificationAnomalyText ] = useState(null);
     const [ isOnTimeout, setIsOnTimeout ] = useState(false);
+    const [ userType, setUserType ] = useState(null);
+
+    var userKind = null;
 
     const send = equation.replace("%2F", "/");
 
@@ -41,20 +44,40 @@ const Preview = () => {
             pinned: false
         }
 
+        const fetchData = async () => {
+            db.collection("users").onSnapshot((querySnapshot) => {
+                const docs = []
+                querySnapshot.forEach((doc) => {
+                    if (doc.id === uid) {
+                        docs.push({ ...doc.data(), id: doc.id });
+                    }
+                });
+
+                try {
+                    setUserType(docs[0].type);
+                    userKind = docs[0].type;
+                } catch (someError) {
+                    setHasGenericAnomaly(true)
+                    setGenericAnomalyText("Error getting the user type")
+                }
+            })
+        }
+
+        await fetchData()
         await db.collection('users').doc(uid).collection('equations').doc().set({
             ...newEquation
         });
     }
 
     const handleSubmit = async () => {
+        await addEquation(send)
         const options = {
             method: "POST",
             uri: `http://127.0.0.1:4000/solve`,
-            body: { equation: send },
+            body: { equation: send, type: userKind },
             json: true
         };
 
-        await addEquation(send)
         var flagWait = true;
         setIsWaiting(true);
 
@@ -150,19 +173,46 @@ const Preview = () => {
 
     const deserializeSolution = (solution) => {
         var solutionAux = []
-        const aux = solution.replaceAll("'", "\"")
-        const jsonSolve = JSON.parse(aux)
+        const aux_01 = solution.replaceAll("'", "\"")
+        const aux_02 = aux_01.replaceAll("\"\"", "\"")
+        console.log(aux_02)
+
+        const jsonSolve = JSON.parse(aux_02)
         for (let index = 0; index < jsonSolve.length; index++) {
             const step = jsonSolve[index];
             const stepHeader = step[0]
+            const imgBase64Array = []
+
+            console.log(getText(stepHeader))
+
             var stepLatex = ""
-            for (let j = 0; j < step[1].length; j++) {
-                stepLatex += step[1][j];
+            if (getText(stepHeader) != " Graphs") {
+                for (let j = 0; j < step[1].length; j++) {
+                    stepLatex += step[1][j];
+                }
+            } else {
+                for (let j = 0; j < step[1].length; j++) {
+                    imgBase64Array.push(step[1][j])
+                }
             }
-            const stepObject = { latex: stepLatex, header: stepHeader }
+
+            const stepObject = { latex: stepLatex, header: stepHeader, images: imgBase64Array }
             solutionAux.push(stepObject)
         }
         setSolution(solutionAux);
+    }
+
+    const renderGraphs = (images) => {
+        if (images.length === 0) {
+            return (<></>)
+        } else {
+            return images.map(image => (
+                <div>
+                    <img width="400" src={"data:image/png;base64," + image} alt="Graph"
+                    style={{marginBottom: 15}}></img>
+                </div>
+            ));
+        }
     }
 
     const renderSolve = () => {
@@ -179,6 +229,7 @@ const Preview = () => {
                     <MathJax.default.Provider>
                         <MathJax.default.Node inline formula={removeSpecialLatex(step.latex)} />
                     </MathJax.default.Provider>
+                    { renderGraphs(step.images) }
                 </div>
             ))
         }
