@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { InterpretationAnomaly } from '../../../anomalies/InterpretationAnomaly';
+import { IP_SERVER } from '../../../global/constats';
 
 const request = require("request-promise");
 
@@ -61,7 +62,7 @@ const MathKeyboard = ({ history }) => {
 
         const options = {
             method: "POST",
-            uri: `http://127.0.0.1:4000/parse/latex`, 
+            uri: `http://${IP_SERVER}:4000/parse/latex`, 
             body: { equation: equation }, 
             json: true
         };

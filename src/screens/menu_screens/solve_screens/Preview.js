@@ -9,6 +9,7 @@ import { GenericAnomaly } from '../../../anomalies/GenericAnomaly'
 import { SolutionTimeoutAnomaly } from '../../../anomalies/SolutionTimeoutAnomaly'
 import { CompletenessAnomaly } from '../../../anomalies/CompletenessAnomaly';
 import { ClassificationAnomaly } from '../../../anomalies/ClassificationAnomaly';
+import { IP_SERVER } from '../../../global/constats';
 
 const request = require("request-promise");
 const MathJax = require('react-mathjax');
@@ -28,7 +29,9 @@ const Preview = () => {
     const [ completenessAnomalyText, setCompletenessAnomalyText ] = useState(null);
     const [ classificationAnomalyText, setClassificationAnomalyText ] = useState(null);
     const [ isOnTimeout, setIsOnTimeout ] = useState(false);
-    const [ userType, setUserType ] = useState(null);
+    const [ downloadButtonVisibility, setDownloadButtonVisibility ] = useState(false);
+    const [ pdfContent, setPdfContent ] = useState(null);
+    const [ latexForRender, setLatexForRender ] = useState([]);
 
     var userKind = null;
 
@@ -54,7 +57,6 @@ const Preview = () => {
                 });
 
                 try {
-                    setUserType(docs[0].type);
                     userKind = docs[0].type;
                 } catch (someError) {
                     setHasGenericAnomaly(true)
@@ -73,7 +75,7 @@ const Preview = () => {
         await addEquation(send)
         const options = {
             method: "POST",
-            uri: `http://127.0.0.1:4000/solve`,
+            uri: `http://${IP_SERVER}:4000/solve`,
             body: { equation: send, type: userKind },
             json: true
         };
@@ -140,19 +142,15 @@ const Preview = () => {
         })
     }
 
-    const removeSpecialLatex = (input) => {
-        return input.replaceAll("$", "")
-    }
-
     const getText = (input) => {
-        return input.replace("\\mathtt{\\text{-", "").replace("}}\\\\ \\\\", "")
+        return input.replace("- ", "").replace("\\\\ \\\\", "")
     }
 
-    const getLaTeX = () => {
+    const getLaTeX = (array) => {
         var latex = "";
-        for (let i = 0; i < solution.length; i++) {
-            latex += solution[i].header;
-            latex += solution[i].latex;
+        for (let i = 0; i < array.length; i++) {
+            latex += getText(array[i].header) + "\\\\\n";
+            latex += array[i].latex + "\\\\\n";
         }
         return latex;
     }
@@ -165,7 +163,8 @@ const Preview = () => {
         if (showLatex) {
             return (
                 <div>
-                    <textarea readOnly className="form-control" style={{ height: "300px" }}>{getLaTeX()}</textarea>
+                    <textarea readOnly className="form-control" style={{ height: "300px" }}>{getLaTeX(latexForRender)}</textarea>
+                    <br></br>
                 </div>
             )
         }
@@ -175,7 +174,6 @@ const Preview = () => {
         var solutionAux = []
         const aux_01 = solution.replaceAll("'", "\"")
         const aux_02 = aux_01.replaceAll("\"\"", "\"")
-        console.log(aux_02)
 
         const jsonSolve = JSON.parse(aux_02)
         for (let index = 0; index < jsonSolve.length; index++) {
@@ -183,12 +181,21 @@ const Preview = () => {
             const stepHeader = step[0]
             const imgBase64Array = []
 
-            console.log(getText(stepHeader))
-
             var stepLatex = ""
-            if (getText(stepHeader) != " Graphs") {
+            var stepLatexForRender = ""
+
+            if (getText(stepHeader) !== "Graphs") {
                 for (let j = 0; j < step[1].length; j++) {
-                    stepLatex += step[1][j];
+                    stepLatexForRender += step[1][j];
+
+                    var stepAux = step[1][j]
+                    if (!step[1][j].includes('$')) {
+                        stepAux = stepAux.replaceAll("\\", "")
+                        stepAux = `\\mathtt{\\text{${stepAux}}}\\\\`
+                    }
+
+                    console.log(stepAux)
+                    stepLatex += stepAux;
                 }
             } else {
                 for (let j = 0; j < step[1].length; j++) {
@@ -197,8 +204,12 @@ const Preview = () => {
             }
 
             const stepObject = { latex: stepLatex, header: stepHeader, images: imgBase64Array }
-            solutionAux.push(stepObject)
+            const stepForRenderObject = { latex: stepLatexForRender, header: stepHeader }
+
+            solutionAux.push(stepObject);
+            latexForRender.push(stepForRenderObject);
         }
+
         setSolution(solutionAux);
     }
 
@@ -215,6 +226,11 @@ const Preview = () => {
         }
     }
 
+    const renderLatexStep = (latex) => {
+        console.log()
+        return latex.replaceAll("$", "");
+    }
+
     const renderSolve = () => {
         if (solution.length !== 0) {
             var i = 1;
@@ -226,8 +242,15 @@ const Preview = () => {
                         {getText(step.header)}
                         {(() => { i++ })()}
                     </h4><br></br>
-                    <MathJax.default.Provider>
-                        <MathJax.default.Node inline formula={removeSpecialLatex(step.latex)} />
+                    <MathJax.default.Provider options={{ tex2jax: { processEscapes: true, 
+                    inlineMath:  [["\\(","\\)"]], displayMath: [["\\[","\\]"]] }, "HTML-CSS": {
+                        fonts: ["TeX"]
+                    } }}>
+                        <MathJax.default.Node 
+                            inline={true} 
+                            formula={renderLatexStep(step.latex)} 
+                            onRender={() => console.log("Step " + (i-1) + " rendered")}
+                        />
                     </MathJax.default.Provider>
                     { renderGraphs(step.images) }
                 </div>
@@ -269,17 +292,49 @@ const Preview = () => {
     }
 
     const handleLatexToPdf = () => {        
-        // var latexCode = "" + 
-        // "\\documentclass{article}" +
-        // "\\begin{document}" +
-        // "\\LaTeX is great!" +
-        // "$E = mc^2$" +
-        // "\\end{document}";
-        // try {
-        //     (new pdftex().compile(latexCode)).then((pdf) => { console.log(pdf) })
-        // } catch (e) {
-        //     alert(e)
-        // }
+        const options = {
+            method: "POST",
+            uri: `http://${IP_SERVER}:4000/pdf`,
+            body: { latex: getLaTeX(latexForRender) },
+            json: true
+        };
+
+        var flagWait = true;
+
+        const res = request(options);
+        
+        setTimeout(() => {
+            if (flagWait) {
+                res.abort()
+                setIsWaiting(false)
+                setIsOnTimeout(true)
+            }
+        }, 30000)
+
+        // Catch the response from the server in body object
+        res.then(body => { 
+            console.log("Pdf content: ")
+            console.log(body.text)
+            flagWait = false
+            setPdfContent(body.text);
+            setDownloadButtonVisibility(true);
+        })
+    }
+
+    const renderDownloadButton = () => {
+        if (downloadButtonVisibility) {
+            const day = new Date();
+            const pdfName = `${day.getFullYear()}-${day.getMonth()}-${day.getDate()}-${day.getHours()}-${day.getMinutes()}-${day.getSeconds()}.pdf` 
+
+            return (
+                <a download={ pdfName } href={ `data:application/pdf;base64,${pdfContent}` } title='Download pdf document'
+                    className="btn btn-primary">
+                    Download PDF Document
+                </a>
+            )
+        } else {
+            return <></>
+        }
     }
 
     return (
@@ -301,6 +356,7 @@ const Preview = () => {
                 {renderLaTeXButton()}
                 {renderLaTeXBox()}
                 {renderLaTeXPdfButton()}
+                {renderDownloadButton()}
             </div>
             { new WaitingScreen(isWaiting, setIsWaiting).display() }
             { new GenericAnomaly(genericAnomalyText, hasGenericAnomaly, setHasGenericAnomaly).display() }

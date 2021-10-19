@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import Navbar from "../../menu_components/Navbar";
 import Popup from "../../global_components/Popup";
+import { IP_SERVER } from "../../../global/constats";
 
 const request = require("request-promise");
 
@@ -32,15 +33,19 @@ const Picture = ({ history }) => {
 
 
     const getVideo = () => {
-        navigator.mediaDevices.getUserMedia({
-            video: { width: 250, height: 250 }
-        }).then(stream => {
-            let video = videoRef.current;
-            video.srcObject = stream;
-            video.play();
-        }).catch(err => {
-            console.error(err);
-        })
+        try {
+            navigator.mediaDevices.getUserMedia({
+                video: { width: 250, height: 250 }
+            }).then(stream => {
+                let video = videoRef.current;
+                video.srcObject = stream;
+                video.play();
+            }).catch(err => {
+                console.error(err);
+            })    
+        } catch (e) {
+            console.log(e.message);
+        }
     }
 
     useEffect(() => {
@@ -58,7 +63,7 @@ const Picture = ({ history }) => {
                         var image64 = e.target.result;
                         image64 = image64.split("data:image/png;base64,")[1]
 
-                        const url = "http://127.0.0.1:4000/image/text";
+                        const url = `http://${IP_SERVER}:4000/image/text`;
                         postData(url, { image: image64 })
                             .then(async data => {
                                 console.log(data);
@@ -66,7 +71,7 @@ const Picture = ({ history }) => {
                                     const requestPreview = async () => {
                                         const options = {
                                             method: "POST",
-                                            uri: `http://127.0.0.1:4000/parse/latex`,
+                                            uri: `http://${IP_SERVER}:4000/parse/latex`,
                                             body: { equation: data.text },
                                             json: true
                                         };
@@ -94,7 +99,7 @@ const Picture = ({ history }) => {
                         return;
                     }
 
-                    const url = "http://127.0.0.1:4000/image/text";
+                    const url = `http://${IP_SERVER}:4000/image/text`;
                     postData(url, { image: imgData })
                         .then(async data => {
                             console.log(data);
@@ -102,7 +107,7 @@ const Picture = ({ history }) => {
                                 const requestPreview = async () => {
                                     const options = {
                                         method: "POST",
-                                        uri: `http://127.0.0.1:4000/parse/latex`,
+                                        uri: `http://${IP_SERVER}:4000/parse/latex`,
                                         body: { equation: data.text },
                                         json: true
                                     };
