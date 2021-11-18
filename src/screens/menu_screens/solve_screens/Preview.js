@@ -31,7 +31,7 @@ const Preview = () => {
     const [ isOnTimeout, setIsOnTimeout ] = useState(false);
     const [ downloadButtonVisibility, setDownloadButtonVisibility ] = useState(false);
     const [ pdfContent, setPdfContent ] = useState(null);
-    const [ latexForRender, setLatexForRender ] = useState([]);
+    const [ latexForRender ] = useState([]);
 
     var userKind = null;
 
