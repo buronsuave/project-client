@@ -75,10 +75,12 @@ const Preview = () => {
         await addEquation(send)
         const options = {
             method: "POST",
-            uri: `http://${IP_SERVER}:4000/solve`,
+            uri: `https://${IP_SERVER}/solve`,
             body: { equation: send, type: userKind },
             json: true
         };
+
+        console.log(options)
 
         var flagWait = true;
         setIsWaiting(true);
@@ -91,7 +93,7 @@ const Preview = () => {
                 setIsWaiting(false)
                 setIsOnTimeout(true)
             }
-        }, 30000)
+        }, 60000)
 
         // Catch the response from the server in body object
         res.then(body => {
@@ -294,7 +296,7 @@ const Preview = () => {
     const handleLatexToPdf = () => {        
         const options = {
             method: "POST",
-            uri: `http://${IP_SERVER}:4000/pdf`,
+            uri: `https://${IP_SERVER}/pdf`,
             body: { latex: getLaTeX(latexForRender) },
             json: true
         };

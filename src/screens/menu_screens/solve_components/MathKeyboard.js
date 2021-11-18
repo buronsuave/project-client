@@ -62,7 +62,7 @@ const MathKeyboard = ({ history }) => {
 
         const options = {
             method: "POST",
-            uri: `http://${IP_SERVER}:4000/parse/latex`, 
+            uri: `http://${IP_SERVER}/parse/latex`, 
             body: { equation: equation }, 
             json: true
         };

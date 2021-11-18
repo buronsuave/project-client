@@ -63,7 +63,7 @@ const Picture = ({ history }) => {
                         var image64 = e.target.result;
                         image64 = image64.split("data:image/png;base64,")[1]
 
-                        const url = `http://${IP_SERVER}:4000/image/text`;
+                        const url = `http://${IP_SERVER}/image/text`;
                         postData(url, { image: image64 })
                             .then(async data => {
                                 console.log(data);
@@ -71,7 +71,7 @@ const Picture = ({ history }) => {
                                     const requestPreview = async () => {
                                         const options = {
                                             method: "POST",
-                                            uri: `http://${IP_SERVER}:4000/parse/latex`,
+                                            uri: `http://${IP_SERVER}/parse/latex`,
                                             body: { equation: data.text },
                                             json: true
                                         };
@@ -99,7 +99,7 @@ const Picture = ({ history }) => {
                         return;
                     }
 
-                    const url = `http://${IP_SERVER}:4000/image/text`;
+                    const url = `http://${IP_SERVER}/image/text`;
                     postData(url, { image: imgData })
                         .then(async data => {
                             console.log(data);
@@ -107,7 +107,7 @@ const Picture = ({ history }) => {
                                 const requestPreview = async () => {
                                     const options = {
                                         method: "POST",
-                                        uri: `http://${IP_SERVER}:4000/parse/latex`,
+                                        uri: `http://${IP_SERVER}/parse/latex`,
                                         body: { equation: data.text },
                                         json: true
                                     };
