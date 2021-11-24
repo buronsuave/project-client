@@ -150,7 +150,7 @@ const Canvas = ({ history }) => {
       var canvas = document.getElementById('canvas');
       var imgData = canvas.toDataURL();
       imgData = imgData.split("data:image/png;base64,")[1]
-      const url = `http://${IP_SERVER}/image/text`;
+      const url = `${IP_SERVER}/image/text`;
           postData(url, { image: imgData })
               .then(async data => {
                   console.log(data);
@@ -158,7 +158,7 @@ const Canvas = ({ history }) => {
                       const requestPreview = async () => {
                           const options = {
                               method: "POST",
-                              uri: `http://${IP_SERVER}/parse/latex`, 
+                              uri: `${IP_SERVER}/parse/latex`, 
                               body: { equation: data.text }, 
                               json: true
                           };

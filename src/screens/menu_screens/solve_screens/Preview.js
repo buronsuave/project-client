@@ -75,7 +75,7 @@ const Preview = () => {
         await addEquation(send)
         const options = {
             method: "POST",
-            uri: `http://${IP_SERVER}/solve`,
+            uri: `${IP_SERVER}/solve`,
             body: { equation: send, type: userKind },
             json: true
         };
@@ -300,7 +300,7 @@ const Preview = () => {
     const handleLatexToPdf = () => {        
         const options = {
             method: "POST",
-            uri: `http://${IP_SERVER}/pdf`,
+            uri: `${IP_SERVER}/pdf`,
             body: { latex: getLaTeX(latexForRender) },
             json: true
         };
