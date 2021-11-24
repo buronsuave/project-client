@@ -191,7 +191,7 @@ const Preview = () => {
             var stepLatex = ""
             var stepLatexForRender = ""
 
-            if (getText(stepHeader) !== " Graphs") {
+            if (getText(stepHeader) !== "Graphs") {
                 for (let j = 0; j < step[1].length; j++) {
                     stepLatexForRender += step[1][j];
 
