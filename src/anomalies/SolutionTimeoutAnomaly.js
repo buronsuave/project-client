@@ -11,7 +11,7 @@ export class SolutionTimeoutAnomaly {
         return (
             <Popup trigger={ this.alertPopup } setTrigger={ this.setAlertPopup }>
                 <h3 style={{ color:"black" }}> Timeout Error </h3>
-                <p style={{ color:"black" }}> There was no answer to the equation in 30 seconds </p>
+                <p style={{ color:"black" }}> There was no answer to the equation in 60 seconds </p>
             </Popup>
         )
     }

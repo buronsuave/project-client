@@ -85,6 +85,7 @@ const Preview = () => {
         var flagWait = true;
         setIsWaiting(true);
 
+        console.log(options.body)
         const res = request(options);
         
         setTimeout(() => {
@@ -145,14 +146,14 @@ const Preview = () => {
     }
 
     const getText = (input) => {
-        return input.replace("- ", " ").replace("\\\\ \\\\", "")
+        return input.replace("- ", "").replace("\\\\ \\\\", "")
     }
 
     const getLaTeX = (array) => {
         var latex = "";
         for (let i = 0; i < array.length; i++) {
             console.log(array[i])
-            latex += getText(array[i].header) + "\\\\\n";
+            latex += "\\section{" + getText(array[i].header) + "}\n";
             latex += array[i].latex + "\\\\\n";
         }
         return latex;
@@ -200,7 +201,6 @@ const Preview = () => {
                         stepAux = `\\mathtt{\\text{${stepAux}}}\\\\`
                     }
 
-                    console.log(stepAux)
                     stepLatex += stepAux;
                 }
             } else {
@@ -245,7 +245,7 @@ const Preview = () => {
                     <br></br>
                     <h4>
                         Step {i}:
-                        {getText(step.header)}
+                        {" " + getText(step.header)}
                         {(() => { i++ })()}
                     </h4><br></br>
                     <MathJax.default.Provider options={{ tex2jax: { processEscapes: true, 
