@@ -75,7 +75,7 @@ const Preview = () => {
         await addEquation(send)
         const options = {
             method: "POST",
-            uri: `https://${IP_SERVER}/solve`,
+            uri: `http://${IP_SERVER}/solve`,
             body: { equation: send, type: userKind },
             json: true
         };
@@ -151,6 +151,7 @@ const Preview = () => {
     const getLaTeX = (array) => {
         var latex = "";
         for (let i = 0; i < array.length; i++) {
+            console.log(array[i])
             latex += getText(array[i].header) + "\\\\\n";
             latex += array[i].latex + "\\\\\n";
         }
@@ -176,10 +177,13 @@ const Preview = () => {
         var solutionAux = []
         const aux_01 = solution.replaceAll("'", "\"")
         const aux_02 = aux_01.replaceAll("\"\"", "\"")
+        console.log(aux_02)
 
         const jsonSolve = JSON.parse(aux_02)
         for (let index = 0; index < jsonSolve.length; index++) {
             const step = jsonSolve[index];
+            console.log(step)
+
             const stepHeader = step[0]
             const imgBase64Array = []
 
@@ -296,7 +300,7 @@ const Preview = () => {
     const handleLatexToPdf = () => {        
         const options = {
             method: "POST",
-            uri: `https://${IP_SERVER}/pdf`,
+            uri: `http://${IP_SERVER}/pdf`,
             body: { latex: getLaTeX(latexForRender) },
             json: true
         };

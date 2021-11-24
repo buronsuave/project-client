@@ -18,14 +18,14 @@
         cy="104"
         class="back"
     
-        fill="#163e3e"
+        fill="#751B19"
         stroke="black" transform="rotate(-45)"
     />
     
     <path 
         stroke="black"
         stroke-width="1"
-        fill="#317171"
+        fill="#9B211F"
         class="body"
 
         d="M 28.312621 120.675565
@@ -39,7 +39,7 @@
     <path
         stroke="black"
         stroke-width="1"
-        fill="#3a9996"
+        fill="#C12825"
         class="belly"
     
         d="M 57.733382 100.679356
@@ -53,7 +53,7 @@
         cx="27" 
         cy="61"
         class="head"
-        fill="#3a9996"
+        fill="#C12825"
         stroke="black" 
         transform="rotate(-45)"
     />
